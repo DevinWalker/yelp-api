@@ -35,40 +35,36 @@
 <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <script type="text/javascript">
+
 var YWSID = "ht7-Lr3VlFM5G4bsvmU6aw"; // common required parameter (api key)
+var map;
+var icon;
 
-var map = null;
-var icon = null;
+jQuery(function ($) {
 
+    var $ywpSearchMaps = $('.yelp-map');
+    infowindow = new google.maps.InfoWindow();
 
-jQuery(function($){
+    /*
+     * Loop through maps and initialize
+     */
+    $ywpSearchMaps.each(function (index, value) {
+        //        var jsonArray = JSON.parse(jQuery($ywpMaps[index]).parent().attr('data-ywp-json'));
+        var infowindow;
+        var mapBounds = null;
+        var myLatlng;
 
-     var $ywpSearchMaps = $('.yelp-map');
-     infowindow = new google.maps.InfoWindow();
+        myLatlng = new google.maps.LatLng(32.7263474, -117.1645212);
+        var mapOptions = {
+            zoom: 10,
+            center: myLatlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
 
-     /*
-      * Loop through maps and initialize
-      */
-     $ywpSearchMaps.each(function (index, value) {
- //        var jsonArray = JSON.parse(jQuery($ywpMaps[index]).parent().attr('data-ywp-json'));
-         var map;
-         var infowindow;
-         var icon = null;
-         var mapBounds = null;
-         var myLatlng;
-
-         myLatlng = new google.maps.LatLng(32.7263474,-117.1645212);
-         var mapOptions = {
-             zoom: 10,
-             center: myLatlng,
-             mapTypeId: google.maps.MapTypeId.ROADMAP
-         };
-
-         map = new google.maps.Map($ywpSearchMaps[index], mapOptions);
+        map = new google.maps.Map($ywpSearchMaps[index], mapOptions);
 
         //When Search Button is Clicked
-
-        $('.yelp-search-submit').on('click',function(){
+        $('.yelp-search-submit').on('click', function () {
 
             var mapBounds = map.getBounds();
             var URL = "http://api.yelp.com/" +
@@ -88,53 +84,11 @@ jQuery(function($){
         });
 
 
-
-     });
-
-
-
-
-
+    });
 
 
 });
 
-/*
- * Creates the map object and calls setCenterAndBounds
- * to instantiate it.
- */
-function load() {
-
-
-
-//
-//        map = new GMap2(document.getElementById("map"));
-//        GEvent.addListener(map, "load", function() {updateMap();});
-//        map.setCenter(new GLatLng(37.7916,-122.4418),13);
-//        map.addControl(new GLargeMapControl());
-//        map.addControl(new GMapTypeControl());
-//        map.setMapType(G_HYBRID_MAP);
-//
-//        if (window.attachEvent) window.attachEvent("onresize", function() { map.checkResize()} );
-//        else if (window.addEventListener) window.addEventListener("resize", function() { map.checkResize()}, false);
-//
-//        // setup our marker icon
-//        icon = new GIcon();
-//        icon.image = "images/marker_star.png";
-//        icon.shadow = "images/marker_shadow.png";
-//        icon.iconSize = new GSize(20, 29);
-//        icon.shadowSize = new GSize(38, 29);
-//        icon.iconAnchor = new GPoint(15, 29);
-//        icon.infoWindowAnchor = new GPoint(15, 3);
-}
-
-/*
- * Construct the URL to call for the API request
- */
-function constructYelpURL(map) {
-
-
-}
 
 /*
  * Called on the form submission: updates the map by
@@ -160,8 +114,7 @@ function updateMap(map, URL) {
  * If a sucessful API response is received, place
  * markers on the map.  If not, display an error.
  */
-function handleResults(data) {
-
+function handleResults(data, map) {
     // turn off spinner animation
     document.getElementById("spinner").style.visibility = 'hidden';
     if (data.message.text == "OK") {
@@ -171,7 +124,7 @@ function handleResults(data) {
         }
         for (var i = 0; i < data.businesses.length; i++) {
             biz = data.businesses[i];
-            createMarker(biz, new google.maps.LatLng(biz.latitude, biz.longitude), i);
+            createMarker(biz, new google.maps.LatLng(biz.latitude, biz.longitude), i, map);
         }
     }
     else {
@@ -257,22 +210,34 @@ function formatPhoneNumber(num) {
  * Creates a marker for the given business and point
  */
 function createMarker(biz, point, markerNum) {
-    var infoWindowHtml = generateInfoWindowHtml(biz);
-    console.log(icon);
-    var marker = new google.maps.Marker(point, icon);
 
-//    GEvent.addListener(marker, "click", function () {
-//        marker.openInfoWindowHtml(infoWindowHtml, {maxWidth: 400});
-//    });
-//    // automatically open first marker
-//    if (markerNum == 0)
-//        marker.openInfoWindowHtml(infoWindowHtml, {maxWidth: 400});
+    //Set Markers
+    var marker = new google.maps.Marker({
+        map: map,
+        icon: "images/marker_star.png",
+        shadow: "images/marker_shadow.png",
+        position: point
+
+    });
+
+    //Set Info Windows
+    marker.content = generateInfoWindowHtml(biz);
+
+    google.maps.event.addListener(marker, 'click', function () {
+           infowindow.setContent(marker.content);
+           infowindow.open(map, marker);
+       });
+
+    //Open First Marker by Default
+    if (markerNum == 0) {
+        infowindow.setContent(marker.content);
+        infowindow.open(map, marker);
+    }
+
 }
-
-//]]>
 </script>
 </head>
-<body onload="load()" onunload="GUnload()">
+<body>
 <div id="top">
     <div id="poweredby">Powered by
         <a href="http://www.yelp.com"><img src="http://static.px.yelp.com/i/map/miniMapLogo.png" border="0"/></a></div>
