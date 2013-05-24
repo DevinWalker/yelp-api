@@ -38,11 +38,11 @@
 <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <script type="text/javascript">
 var auth = {
-
-    consumerKey: "NLzpDyRu35JeHhOzQAIHuQ",
-    consumerSecret: "1eQpHwSO38jMSsI37QOjBWuroeQ",
-    accessToken: "TwGrMrsdVSRmEiMMlVj2cnu2Wfh44Q4B",
-    accessTokenSecret: "TJmJ6TyPMWduQPyUA6Vnf4esavE",
+    //Customize yours below:
+    consumerKey: "INSERT-YOUR-API-KEY",
+    consumerSecret: "INSERT-YOUR-API-KEY",
+    accessToken: "INSERT-YOUR-API-KEY",
+    accessTokenSecret: "INSERT-YOUR-API-KEY",
     serviceProvider: {
         signatureMethod: "HMAC-SHA1"
     }
@@ -236,7 +236,6 @@ function generateInfoWindowHtml(biz) {
     }
 
     //Neighborhoods
-    console.log(biz);
     if (biz.location.neighborhoods !== undefined) {
         text += formatNeighborhoods(biz.location.neighborhoods);
     }
