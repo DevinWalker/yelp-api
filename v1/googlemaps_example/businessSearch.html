@@ -57,9 +57,10 @@ jQuery(function ($) {
     //Default Term
     var defaultTerm = $('.yelp-search-term').attr('placeholder');
 
-
     var $ywpSearchMaps = $('.yelp-map');
-    infowindow = new google.maps.InfoWindow();
+    infowindow = new google.maps.InfoWindow({
+        maxWidth: 400 //max-width for containers  https://developers.google.com/maps/documentation/javascript/examples/infowindow-simple-max
+    });
 
     /*
      * Loop through maps and initialize
@@ -83,9 +84,7 @@ jQuery(function ($) {
         $('.yelp-search-form').on('submit', function (e) {
             e.preventDefault();
             var newTerm = $(this).children('.yelp-search-term').val();
-            console.log(newTerm);
             yelpMapDataInit(newTerm, 'San Diego', map);
-
 
         });
 
@@ -162,7 +161,6 @@ function handleResults(data, map) {
 }
 
 
-
 /**
  * Creates a marker for the given business and point
  */
@@ -218,6 +216,7 @@ function updateMap(map, URL) {
  * (displayed in a balloon when a marker is clicked)
  */
 function generateInfoWindowHtml(biz) {
+
     var text = '<div class="marker">';
 
     // image and rating
@@ -232,31 +231,31 @@ function generateInfoWindowHtml(biz) {
     // reviews
     text += biz.review_count + '&nbsp;reviews<br/><br />';
     // categories
-    text += formatCategories(biz.categories);
-    // neighborhoods
+    if (biz.categories !== undefined) {
+        text += formatCategories(biz.categories);
+    }
 
+    //Neighborhoods
+    console.log(biz);
     if (biz.location.neighborhoods !== undefined) {
         text += formatNeighborhoods(biz.location.neighborhoods);
     }
 
-    // address
-//    text += biz.location.address[0] + '<br/>';
+    //Display Address
+    if (biz.location.display_address[0] !== undefined){
+        text += formatAddress(biz.location.display_address);
+    }
 
-    // address2
-//    if (biz.location.address[1].length){
-//        text += biz.location.address[1] + '<br/>';
-//    }
-
-
-    // phone number
-    if (biz.phone.length){
+    //Phone number
+    if (biz.phone.length) {
         text += formatPhoneNumber(biz.phone);
     }
 
     // Read the reviews
     text += '<br/><a href="' + biz.url + '" target="_blank">Read the reviews »</a><br/>';
     // div end
-    text += '</div></div>'
+    text += '</div></div>';
+
     return text;
 }
 
@@ -264,27 +263,53 @@ function generateInfoWindowHtml(biz) {
  * Formats the categories HTML
  */
 function formatCategories(cats) {
-    var s = 'Categories: ';
+    var output = '<strong>Categories:</strong> ';
     for (var i = 0; i < cats.length; i++) {
-        s += cats[i].name;
-        if (i != cats.length - 1) s += ', ';
+        output += cats[i][0];
+        if (i != cats.length - 1) {
+            output += ', ';
+        }
     }
-    s += '<br/>';
-    return s;
+    output += '<br/>';
+    return output;
 }
 
 /*
  * Formats the neighborhoods HTML
  */
 function formatNeighborhoods(neighborhoods) {
-    s = 'Neighborhoods: ';
+    output = '<strong>Neighborhoods:</strong><br/> ';
     for (var i = 0; i < neighborhoods.length; i++) {
-        s += '<a href="' + neighborhoods[i].url + '" target="_blank">' + neighborhoods[i].name + '</a>';
-        if (i != neighborhoods.length - 1) s += ', ';
+        output += neighborhoods[i];
+        if (i != neighborhoods.length - 1) {
+            output += ', ';
+        }
     }
-    s += '<br/>';
-    return s;
+    output += '<br/>';
+    return output;
 }
+
+/**
+ * Format Address
+ * @param address array
+ * @returns formatted string
+ */
+
+function formatAddress(address) {
+
+    output = '<strong>Address:</strong> ';
+    for (var i = 0; i < address.length; i++) {
+        output += address[i];
+        if (i != address.length - 1) {
+            output += '<br/>';
+        }
+    }
+    output += '<br/>';
+
+    return output;
+
+}
+
 
 /*
  * Formats the phone number HTML
@@ -299,10 +324,10 @@ function formatPhoneNumber(num) {
  */
 
 function clearOverlays() {
-  for (var i = 0; i < markersArray.length; i++ ) {
-    markersArray[i].setMap(null);
-  }
-  markersArray = [];
+    for (var i = 0; i < markersArray.length; i++) {
+        markersArray[i].setMap(null);
+    }
+    markersArray = [];
 }
 
 </script>
